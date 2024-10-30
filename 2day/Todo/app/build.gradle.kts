@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     jacoco
+    id("kotlin-kapt")
 }
 
 android {
@@ -52,12 +53,21 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+    }
 }
 
 dependencies {
 
     // Unit Test에서 사용할 경우
     testImplementation("io.mockk:mockk:1.13.8")
+
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    kapt(libs.androidx.room.compiler)
 
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.core.ktx)
@@ -94,8 +104,7 @@ tasks.register("jacocoTestReport", JacocoReport::class) {
     sourceDirectories.setFrom(files("src/main/java", "src/main/kotlin"))
     classDirectories.setFrom(
         files(
-            fileTree("${buildDir}/tmp/kotlin-classes/debug") { include("**/*.class") },
-            fileTree("${buildDir}/intermediates/classes/debug") { include("**/*.class") }
+            fileTree("${buildDir}/tmp/kotlin-classes/debug") { include("**/*.class") }
         )
     )
     executionData.setFrom(fileTree(buildDir).include(

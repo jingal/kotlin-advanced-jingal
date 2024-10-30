@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
@@ -15,6 +17,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -38,6 +41,7 @@ fun BaseballApp() {
     var result by remember { mutableStateOf<BallCount?>(null) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var isGameWon by remember { mutableStateOf(false) }
+    val history = remember { mutableStateListOf<Pair<String, BallCount>>() }
 
     Column(
         modifier = Modifier
@@ -62,6 +66,7 @@ fun BaseballApp() {
                     errorMessage = null
                     val gameResult = baseball.play(guessInput)
                     result = gameResult
+                    history.add(guessInput to gameResult)  // history 리스트에 저장
 
                     if (gameResult.strikes == 3) {
                         isGameWon = true
@@ -90,6 +95,12 @@ fun BaseballApp() {
 
         errorMessage?.let {
             Text("오류: $it", color = MaterialTheme.colorScheme.error)
+        }
+
+        LazyColumn(modifier = Modifier.padding(top = 16.dp)) {
+            items(history) { entry ->
+                Text("Guess: ${entry.first} - Strikes: ${entry.second.strikes}, Balls: ${entry.second.balls}")
+            }
         }
     }
 }
